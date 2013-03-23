@@ -1,3 +1,9 @@
-Text Splitter:
+Text Splitter
+=============
 
-TODO: Flesh out this readme.
+Text splitter splits up multiple word text objects into individual word
+objects in a scene.
+
+Upon installation, it can be found in the tools section of the 3D view.  It 
+will be active anytime a text object is selected.
+
