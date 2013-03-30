@@ -19,7 +19,7 @@
 
 # (c) 2011 Phil Cote (cotejrp1)
 import bpy
-from bpy_extras.object_utils import AddObjectHelper, object_data_add
+from bpy_extras.object_utils import object_data_add
 
 bl_info = {
     'name': 'Text Splitter',
@@ -32,25 +32,21 @@ bl_info = {
     "category": "Text"
 }
 
-class TextSplitOperator(bpy.types.Operator, AddObjectHelper):
+class TextSplitOperator(bpy.types.Operator):
     """Text split operator"""
     bl_idname = "text.split"
     bl_label = "Text Splitter"
     bl_options = {'REGISTER', 'UNDO', 'PRESET'}
+    shift_vector = bpy.props.FloatVectorProperty("Starting Shift Vector", 
+                                        min=-10, max=10,
+                                        default=(0.0,0.0,0.0),
+                                        description = "test xyz type", subtype='XYZ')
+                                        
+    offset_vector = bpy.props.FloatVectorProperty("Spacing Vector", 
+                                        min=-10, max=10,
+                                        default=(0.0,0.0,0.0),
+                                        description = "test xyz type", subtype='XYZ')
     
-    x_text_offset = bpy.props.FloatProperty(name="X Text Offset",
-                                        description="X Offset of the text",
-                                        min=-10, max=10, default=0)
-    
-    y_text_offset = bpy.props.FloatProperty(name="Y Text Offset",
-                                        description="Y Offset of the text",
-                                        min=-10, max=10, default=0)
-    
-    z_text_offset = bpy.props.FloatProperty(name="Z Text Offset",
-                                        description="Z Offset of the text",
-                                        min=-10, max=10, default=0)
-    
-
     @classmethod
     def poll(cls, context):
         ob = context.active_object
@@ -71,14 +67,14 @@ class TextSplitOperator(bpy.types.Operator, AddObjectHelper):
             txt_curve.body = the_word
             new_ob = bpy.data.objects.new(the_word, txt_curve)
             scn.objects.link(new_ob)
-            new_ob.location = txt_ob.location
+            new_ob.location = txt_ob.location + self.shift_vector
             new_ob.location.x += cur_x_offset
             new_ob.location.y += cur_y_offset
             new_ob.location.z += cur_z_offset
             
-            cur_x_offset += self.x_text_offset
-            cur_y_offset += self.y_text_offset
-            cur_z_offset += self.z_text_offset
+            cur_x_offset += self.offset_vector.x
+            cur_y_offset += self.offset_vector.y
+            cur_z_offset += self.offset_vector.z
 
         return {'FINISHED'}
 
