@@ -38,9 +38,18 @@ class TextSplitOperator(bpy.types.Operator, AddObjectHelper):
     bl_label = "Text Splitter"
     bl_options = {'REGISTER', 'UNDO', 'PRESET'}
     
-    text_offset = bpy.props.FloatProperty(name="Text Offset",
-                                        description="Offset of the text",
-                                        min=0, max=10, default=0)
+    x_text_offset = bpy.props.FloatProperty(name="X Text Offset",
+                                        description="X Offset of the text",
+                                        min=-10, max=10, default=0)
+    
+    y_text_offset = bpy.props.FloatProperty(name="Y Text Offset",
+                                        description="Y Offset of the text",
+                                        min=-10, max=10, default=0)
+    
+    z_text_offset = bpy.props.FloatProperty(name="Z Text Offset",
+                                        description="Z Offset of the text",
+                                        min=-10, max=10, default=0)
+    
 
     @classmethod
     def poll(cls, context):
@@ -55,7 +64,7 @@ class TextSplitOperator(bpy.types.Operator, AddObjectHelper):
         txt_str = txt_data.body
         txt_lst = txt_str.split()
         
-        cur_offset = 0
+        cur_x_offset, cur_y_offset, cur_z_offset = 0,0,0
         
         for the_word in txt_lst:
             txt_curve = bpy.data.curves.new(the_word, type="FONT")
@@ -63,8 +72,13 @@ class TextSplitOperator(bpy.types.Operator, AddObjectHelper):
             new_ob = bpy.data.objects.new(the_word, txt_curve)
             scn.objects.link(new_ob)
             new_ob.location = txt_ob.location
-            new_ob.location.x += cur_offset
-            cur_offset += self.text_offset
+            new_ob.location.x += cur_x_offset
+            new_ob.location.y += cur_y_offset
+            new_ob.location.z += cur_z_offset
+            
+            cur_x_offset += self.x_text_offset
+            cur_y_offset += self.y_text_offset
+            cur_z_offset += self.z_text_offset
 
         return {'FINISHED'}
 
