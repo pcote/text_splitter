@@ -19,38 +19,40 @@
 
 # (c) 2011 Phil Cote (cotejrp1)
 import bpy
-from bpy_extras.object_utils import object_data_add
 
 bl_info = {
     'name': 'Text Splitter',
     'author': 'Phil Cote, cotejrp1',
-    'version': (0,1),
-    "blender": (2,66,3),
+    'version': (0, 1),
+    "blender": (2, 66, 3),
     "location": 'View3D > ',
     "description": "Splits up text objects into multiple words",
     "warning": "",
     "category": "Text"
 }
 
+
 class TextSplitOperator(bpy.types.Operator):
     """Text split operator"""
     bl_idname = "text.split"
     bl_label = "Text Splitter"
     bl_options = {'REGISTER', 'UNDO', 'PRESET'}
-    shift_vector = bpy.props.FloatVectorProperty("Starting Shift Vector", 
+    shift_vector = bpy.props.FloatVectorProperty("Starting Shift Vector",
                                         min=-10, max=10,
-                                        default=(0.0,0.0,0.0),
-                                        description = "test xyz type", subtype='XYZ')
-                                        
-    offset_vector = bpy.props.FloatVectorProperty("Spacing Vector", 
+                                        default=(0.0, 0.0, 0.0),
+                                        description = "test xyz type",
+                                        subtype='XYZ')
+
+    offset_vector = bpy.props.FloatVectorProperty("Spacing Vector",
                                         min=-10, max=10,
-                                        default=(0.0,0.0,0.0),
-                                        description = "test xyz type", subtype='XYZ')
-    
+                                        default=(0.0, 0.0, 0.0),
+                                        description="test xyz type",
+                                        subtype='XYZ')
+
     @classmethod
     def poll(cls, context):
         ob = context.active_object
-        is_valid = ob != None and ob.type == 'FONT'
+        is_valid = ob is not None and ob.type == 'FONT'
         return is_valid
 
     def execute(self, context):
@@ -58,20 +60,22 @@ class TextSplitOperator(bpy.types.Operator):
         txt_ob = context.active_object
         txt_data = context.active_object.data
         txt_str = txt_data.body
-        txt_lst = txt_str.split()
-        
-        cur_x_offset, cur_y_offset, cur_z_offset = 0,0,0
-        
+        txt_lst = txt_str.split()     
+
+        cur_x_offset, cur_y_offset, cur_z_offset = 0, 0, 0
+
         for the_word in txt_lst:
             txt_curve = bpy.data.curves.new(the_word, type="FONT")
             txt_curve.body = the_word
             new_ob = bpy.data.objects.new(the_word, txt_curve)
             scn.objects.link(new_ob)
+            
+            new_ob.name = "text_%s" % the_word.lower()
             new_ob.location = txt_ob.location + self.shift_vector
             new_ob.location.x += cur_x_offset
             new_ob.location.y += cur_y_offset
             new_ob.location.z += cur_z_offset
-            
+
             cur_x_offset += self.offset_vector.x
             cur_y_offset += self.offset_vector.y
             cur_z_offset += self.offset_vector.z
@@ -80,7 +84,7 @@ class TextSplitOperator(bpy.types.Operator):
 
 
 class TextSplitPanel(bpy.types.Panel):
-    
+
     """Text Splitting Tool"""
     bl_label = "Text Splitter"
     bl_idname = "SCENE_PT_splittext"
