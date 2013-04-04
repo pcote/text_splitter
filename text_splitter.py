@@ -49,11 +49,13 @@ class TextSplitOperator(bpy.types.Operator):
                                         default=(0.0, 0.0, 0.0),
                                         description="test xyz type",
                                         subtype='XYZ')
-    
+
+    choices = [("word", "word", "word",),
+              ("character", "character", "character",)]
+
     split_by_enum = bpy.props.EnumProperty(name="Not Yet Functional",
-                                        description="Do not use yet. Does not work.",
-                                        items=(("word", "word", "word",), 
-                                                ("character", "character", "character",)))
+                                description="Do not use yet. Does not work.",
+                                items=choices)
 
     @classmethod
     def poll(cls, context):
@@ -66,22 +68,17 @@ class TextSplitOperator(bpy.types.Operator):
         txt_ob = context.active_object
         txt_data = context.active_object.data
         txt_str = txt_data.body
-        """
-        if split_by_enum == "word":
-            txt_list = txt_str.split()
-        else:
-            txt_list = list(txt_str)
-         """
-        txt_lst = txt_str.split()
+        choice = self.split_by_enum
+        txt_lst = txt_str.split() if choice == "word" else list(txt_str)
         cur_x_offset, cur_y_offset, cur_z_offset = 0, 0, 0
-        
+
 
         for the_word in txt_lst:
             txt_curve = bpy.data.curves.new(the_word, type="FONT")
             txt_curve.body = the_word
             new_ob = bpy.data.objects.new(the_word, txt_curve)
             scn.objects.link(new_ob)
-            
+
             new_ob.name = "text_%s" % the_word.lower()
             new_ob.location = txt_ob.location + self.shift_vector
             new_ob.location.x += cur_x_offset
