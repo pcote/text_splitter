@@ -19,7 +19,6 @@
 
 # (c) 2011 Phil Cote (cotejrp1)
 import bpy
-from pdb import set_trace
 
 bl_info = {
     'name': 'Text Splitter',
@@ -53,8 +52,8 @@ class TextSplitOperator(bpy.types.Operator):
     choices = [("word", "word", "word",),
               ("character", "character", "character",)]
 
-    split_by_enum = bpy.props.EnumProperty(name="Not Yet Functional",
-                                description="Do not use yet. Does not work.",
+    split_by_enum = bpy.props.EnumProperty(name="Split By Character or Letter",
+                                description="Option to split by character or letter",
                                 items=choices)
 
     @classmethod
@@ -69,7 +68,8 @@ class TextSplitOperator(bpy.types.Operator):
         txt_data = context.active_object.data
         txt_str = txt_data.body
         choice = self.split_by_enum
-        txt_lst = txt_str.split() if choice == "word" else list(txt_str)
+        txt_lst = txt_str.split() if choice == "word" else list(txt_str.replace(" ", ""))
+        
         cur_x_offset, cur_y_offset, cur_z_offset = 0, 0, 0
 
 
