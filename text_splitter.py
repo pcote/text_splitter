@@ -26,7 +26,7 @@ bl_info = {
     'version': (0, 1),
     "blender": (2, 66, 3),
     "location": 'View3D > ',
-    "description": "Splits up text objects into multiple words",
+    "description": "Splits up text objects into multiple words or characters",
     "warning": "",
     "category": "Text"
 }
@@ -68,13 +68,17 @@ class TextSplitOperator(bpy.types.Operator):
         txt_data = context.active_object.data
         txt_str = txt_data.body
         choice = self.split_by_enum
-        txt_lst = txt_str.split() if choice == "word" else list(txt_str.replace(" ", ""))
+        
+        txt_lst = list(txt_str.replace(" ", ""))
+        if choice == "word":
+            txt_lst = txt_str.split()
         
         cur_x_offset, cur_y_offset, cur_z_offset = 0, 0, 0
 
 
         for the_word in txt_lst:
             txt_curve = bpy.data.curves.new(the_word, type="FONT")
+            txt_curve = txt_data.copy()
             txt_curve.body = the_word
             new_ob = bpy.data.objects.new(the_word, txt_curve)
             scn.objects.link(new_ob)
