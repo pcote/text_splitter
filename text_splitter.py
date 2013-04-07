@@ -64,32 +64,40 @@ class TextSplitOperator(bpy.types.Operator):
 
     def execute(self, context):
         scn = bpy.context.scene
-        txt = bpy.context.object
+        target_txt = bpy.context.object
         
         spline = 0
-        spaces = []
         
-        pos = txt.location[0]
-        col = txt.dimensions[0]
-        if txt.data.align == 'CENTER': pos -= col / 2
-        if txt.data.align == 'RIGHT': pos -= col
-    
-        for i in range(len(txt.data.body)):
-            chr = txt.data.body[i:i+1]
+        pos = target_txt.location[0]
+        col = target_txt.dimensions[0]
+        if target_txt.data.align == 'CENTER': pos -= col / 2
+        if target_txt.data.align == 'RIGHT': pos -= col
+        
+        # text creation logic for individual letters.
+        target_size = len(target_txt.data.body)
+        
+        for i in range(target_size):
+            
+            # core creation of the new text object data.
+            chr = target_txt.data.body[i:i+1]
             if chr.isspace(): continue
-            new_txt_dat = txt.data.copy()
+            new_txt_dat = target_txt.data.copy()
             new_txt_dat.body = chr
+            
+            # boilerplate text creation
             name = "text_%s" % new_txt_dat.body
             new_txt_ob = bpy.data.objects.new(name, new_txt_dat)
             scn.objects.link(new_txt_ob)
             scn.frame_set(scn.frame_current)
             
-            pos = txt.data.splines[spline].bezier_points[0].co
+            # place the new character text ob in the right spot.
+            pos = target_txt.data.splines[spline].bezier_points[0].co
             new_txt_ob.location = pos - new_txt_ob.data.splines[0].bezier_points[0].co
+            
             spline += len((new_txt_ob.data.splines))
     
-        scn.objects.active = txt
-        txt.select = True
+        scn.objects.active = target_txt
+        target_txt.select = True
 
         return {'FINISHED'}
 
