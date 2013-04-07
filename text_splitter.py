@@ -63,35 +63,33 @@ class TextSplitOperator(bpy.types.Operator):
         return is_valid
 
     def execute(self, context):
-        scn = context.scene
-        txt_ob = context.active_object
-        txt_data = context.active_object.data
-        txt_str = txt_data.body
-        choice = self.split_by_enum
+        scn = bpy.context.scene
+        txt = bpy.context.object
         
-        txt_lst = list(txt_str.replace(" ", ""))
-        if choice == "word":
-            txt_lst = txt_str.split()
+        spline = 0
+        spaces = []
         
-        cur_x_offset, cur_y_offset, cur_z_offset = 0, 0, 0
-
-
-        for the_word in txt_lst:
-            txt_curve = bpy.data.curves.new(the_word, type="FONT")
-            txt_curve = txt_data.copy()
-            txt_curve.body = the_word
-            new_ob = bpy.data.objects.new(the_word, txt_curve)
-            scn.objects.link(new_ob)
-
-            new_ob.name = "text_%s" % the_word.lower()
-            new_ob.location = txt_ob.location + self.shift_vector
-            new_ob.location.x += cur_x_offset
-            new_ob.location.y += cur_y_offset
-            new_ob.location.z += cur_z_offset
-
-            cur_x_offset += self.offset_vector.x
-            cur_y_offset += self.offset_vector.y
-            cur_z_offset += self.offset_vector.z
+        pos = txt.location[0]
+        col = txt.dimensions[0]
+        if txt.data.align == 'CENTER': pos -= col / 2
+        if txt.data.align == 'RIGHT': pos -= col
+    
+        for i in range(len(txt.data.body)):
+            chr = txt.data.body[i:i+1]
+            if chr.isspace(): continue
+            new_txt_dat = txt.data.copy()
+            new_txt_dat.body = chr
+            name = "text_%s" % new_txt_dat.body
+            new_txt_ob = bpy.data.objects.new(name, new_txt_dat)
+            scn.objects.link(new_txt_ob)
+            scn.frame_set(scn.frame_current)
+            
+            pos = txt.data.splines[spline].bezier_points[0].co
+            new_txt_ob.location = pos - new_txt_ob.data.splines[0].bezier_points[0].co
+            spline += len((new_txt_ob.data.splines))
+    
+        scn.objects.active = txt
+        txt.select = True
 
         return {'FINISHED'}
 
