@@ -19,6 +19,7 @@
 
 # (c) 2011 Phil Cote (cotejrp1)
 import bpy
+from pdb import set_trace
 
 bl_info = {
     'name': 'Text Splitter',
@@ -61,11 +62,8 @@ class TextSplitOperator(bpy.types.Operator):
         ob = context.active_object
         is_valid = ob is not None and ob.type == 'FONT'
         return is_valid
-
-    def execute(self, context):
-        scn = bpy.context.scene
-        target_txt = bpy.context.object
-        
+    
+    def letter_by_letter_create(self, scn, target_txt):
         spline = 0
         
         pos = target_txt.location[0]
@@ -74,9 +72,8 @@ class TextSplitOperator(bpy.types.Operator):
         if target_txt.data.align == 'RIGHT': pos -= col
         
         # text creation logic for individual letters.
-        target_size = len(target_txt.data.body)
-        
-        for i in range(target_size):
+        letter_count = len(target_txt.data.body)
+        for i in range(letter_count):
             
             # core creation of the new text object data.
             chr = target_txt.data.body[i:i+1]
@@ -84,7 +81,7 @@ class TextSplitOperator(bpy.types.Operator):
             new_txt_dat = target_txt.data.copy()
             new_txt_dat.body = chr
             
-            # boilerplate text creation
+            # text creation step
             name = "text_%s" % new_txt_dat.body
             new_txt_ob = bpy.data.objects.new(name, new_txt_dat)
             scn.objects.link(new_txt_ob)
@@ -95,7 +92,11 @@ class TextSplitOperator(bpy.types.Operator):
             new_txt_ob.location = pos - new_txt_ob.data.splines[0].bezier_points[0].co
             
             spline += len((new_txt_ob.data.splines))
-    
+            
+    def execute(self, context):
+        scn = bpy.context.scene
+        target_txt = bpy.context.object
+        self.letter_by_letter_create(scn, target_txt)
         scn.objects.active = target_txt
         target_txt.select = True
 
