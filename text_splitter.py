@@ -63,6 +63,37 @@ class TextSplitOperator(bpy.types.Operator):
         is_valid = ob is not None and ob.type == 'FONT'
         return is_valid
     
+    def word_by_word_create(self, scn, target_txt):
+        
+        """
+        metanote: this pseudocode is seriously derped!
+        split up the words
+        for each target word
+            make a word object
+            position the word object
+            for each letter in the word
+                create the letter spline
+                position the letter spline
+                make the letter spline part of the word
+        """
+        spline = 0
+        target_words = target_txt.data.body.split()
+        
+        for target_word in target_words:
+            new_txt_data = target_txt.data.copy()
+            new_txt_data.body = target_word
+            new_word_name = "txt_%s" % target_word
+            new_word_ob = bpy.data.objects.new(new_word_name, new_txt_data)
+            scn.objects.link(new_word_ob)
+            scn.frame_set(scn.frame_current)
+            
+            # place the new word in the right spot
+            pos = target_txt.data.splines[spline].bezier_points[0].co
+            new_word_ob.location = pos - new_txt_data.splines[0].bezier_points[0].co
+            spline += len(new_word_ob.data.splines)
+            
+        
+        
     def letter_by_letter_create(self, scn, target_txt):
         spline = 0
         
@@ -73,6 +104,7 @@ class TextSplitOperator(bpy.types.Operator):
         
         # text creation logic for individual letters.
         letter_count = len(target_txt.data.body)
+        
         for i in range(letter_count):
             
             # core creation of the new text object data.
@@ -96,7 +128,10 @@ class TextSplitOperator(bpy.types.Operator):
     def execute(self, context):
         scn = bpy.context.scene
         target_txt = bpy.context.object
-        self.letter_by_letter_create(scn, target_txt)
+        if "word" == self.split_by_enum:
+            self.word_by_word_create(scn, target_txt)
+        else:
+            self.letter_by_letter_create(scn, target_txt)
         scn.objects.active = target_txt
         target_txt.select = True
 
