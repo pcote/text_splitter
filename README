@@ -1,9 +1,5 @@
 Text Splitter
 =============
 
-Text splitter splits up multiple word text objects into individual word
-objects in a scene.
-
-Activating the tool will bring up options that can be used to shift the origin
-point of the new set of words.  You can also change the spacing between words.
-
+Text splitter splits up text objects into individual words or letters 
+within a scene.
