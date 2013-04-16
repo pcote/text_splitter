@@ -19,14 +19,13 @@
 
 # (c) 2011 Phil Cote (cotejrp1)
 import bpy
-from pdb import set_trace
 
 bl_info = {
     'name': 'Text Splitter',
     'author': 'Phil Cote, cotejrp1',
     'version': (0, 1),
     "blender": (2, 66, 3),
-    "location": 'View3D > ',
+    "location": 'View3D > Tools',
     "description": "Splits up text objects into multiple words or characters",
     "warning": "",
     "category": "Text"
@@ -53,8 +52,8 @@ class TextSplitOperator(bpy.types.Operator):
     choices = [("word", "word", "word",),
               ("character", "character", "character",)]
 
-    split_by_enum = bpy.props.EnumProperty(name="Split By Character or Letter",
-                                description="Option to split by character or letter",
+    split_by_enum = bpy.props.EnumProperty(name="Split By Character or Word",
+                                description="Split by character or letter",
                                 items=choices)
 
     @classmethod
@@ -62,23 +61,12 @@ class TextSplitOperator(bpy.types.Operator):
         ob = context.active_object
         is_valid = ob is not None and ob.type == 'FONT'
         return is_valid
-    
+
     def word_by_word_create(self, scn, target_txt):
-        
-        """
-        metanote: this pseudocode is seriously derped!
-        split up the words
-        for each target word
-            make a word object
-            position the word object
-            for each letter in the word
-                create the letter spline
-                position the letter spline
-                make the letter spline part of the word
-        """
+
         spline = 0
         target_words = target_txt.data.body.split()
-        
+
         for target_word in target_words:
             new_txt_data = target_txt.data.copy()
             new_txt_data.body = target_word
@@ -86,45 +74,48 @@ class TextSplitOperator(bpy.types.Operator):
             new_word_ob = bpy.data.objects.new(new_word_name, new_txt_data)
             scn.objects.link(new_word_ob)
             scn.frame_set(scn.frame_current)
-            
+
             # place the new word in the right spot
             pos = target_txt.data.splines[spline].bezier_points[0].co
-            new_word_ob.location = pos - new_txt_data.splines[0].bezier_points[0].co
+            new_loc = pos - new_txt_data.splines[0].bezier_points[0].co
+            new_word_ob.location = new_loc
             spline += len(new_word_ob.data.splines)
-            
-        
-        
+
     def letter_by_letter_create(self, scn, target_txt):
         spline = 0
-        
+
         pos = target_txt.location[0]
         col = target_txt.dimensions[0]
-        if target_txt.data.align == 'CENTER': pos -= col / 2
-        if target_txt.data.align == 'RIGHT': pos -= col
-        
+        if target_txt.data.align == 'CENTER':
+            pos -= col / 2
+        if target_txt.data.align == 'RIGHT':
+            pos -= col
+
         # text creation logic for individual letters.
         letter_count = len(target_txt.data.body)
-        
+
         for i in range(letter_count):
-            
+
             # core creation of the new text object data.
             chr = target_txt.data.body[i:i+1]
-            if chr.isspace(): continue
+            if chr.isspace():
+                continue
             new_txt_dat = target_txt.data.copy()
             new_txt_dat.body = chr
-            
+
             # text creation step
             name = "text_%s" % new_txt_dat.body
             new_txt_ob = bpy.data.objects.new(name, new_txt_dat)
             scn.objects.link(new_txt_ob)
             scn.frame_set(scn.frame_current)
-            
+
             # place the new character text ob in the right spot.
             pos = target_txt.data.splines[spline].bezier_points[0].co
-            new_txt_ob.location = pos - new_txt_ob.data.splines[0].bezier_points[0].co
-            
+            new_loc = pos - new_txt_ob.data.splines[0].bezier_points[0].co
+            new_txt_ob.location = new_loc
+
             spline += len((new_txt_ob.data.splines))
-            
+
     def execute(self, context):
         scn = bpy.context.scene
         target_txt = bpy.context.object
