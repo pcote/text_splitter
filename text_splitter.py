@@ -8,7 +8,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.    See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
@@ -37,17 +37,6 @@ class TextSplitOperator(bpy.types.Operator):
     bl_idname = "text.split"
     bl_label = "Text Splitter"
     bl_options = {'REGISTER', 'UNDO', 'PRESET'}
-    shift_vector = bpy.props.FloatVectorProperty("Starting Shift Vector",
-                                        min=-10, max=10,
-                                        default=(0.0, 0.0, 0.0),
-                                        description = "test xyz type",
-                                        subtype='XYZ')
-
-    offset_vector = bpy.props.FloatVectorProperty("Spacing Vector",
-                                        min=-10, max=10,
-                                        default=(0.0, 0.0, 0.0),
-                                        description="test xyz type",
-                                        subtype='XYZ')
 
     choices = [("word", "word", "word",),
               ("character", "character", "character",)]
